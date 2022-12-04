@@ -17,6 +17,7 @@ use chrono_tz::America::New_York;
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
     let file = File::open(filename).expect("no such file");
@@ -50,6 +51,10 @@ fn main() -> Result<(), Error>{
         }
         3 => {
             day3::run();
+            Ok(())
+        },
+        4 => {
+            day4::run();
             Ok(())
         },
         _ => bail!("not done yet"),
