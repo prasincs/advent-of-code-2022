@@ -1,6 +1,6 @@
 use std::mem::replace;
 
-fn mover(lines: Vec<String>, reverse: bool){
+fn mover(lines: Vec<String>, reverse: bool) {
     // let mut stacks : Vec<Vec<char>> = Vec::with_capacity(9);
     // [P]     [C]         [M]
     // [D]     [P] [B]     [V] [S]
@@ -33,7 +33,8 @@ fn mover(lines: Vec<String>, reverse: bool){
             let to_idx: i32 = cmd.get(5).unwrap().parse::<i32>().unwrap() - 1;
             // println!("{:?}", stacks);
             let read_stacks = stacks.clone();
-            let num_scaled: usize = std::cmp::min(num as usize, read_stacks[from_idx as usize].len());
+            let num_scaled: usize =
+                std::cmp::min(num as usize, read_stacks[from_idx as usize].len());
             let (subs, from_stack) = read_stacks[from_idx as usize].split_at(num_scaled);
 
             let mut to_stack: String = read_stacks[to_idx as usize].to_string();
@@ -41,9 +42,9 @@ fn mover(lines: Vec<String>, reverse: bool){
                 "starting: {:?}, {:?}, remainder_from: {:?}, to: {:?}",
                 read_stacks[from_idx as usize], subs, from_stack, to_stack
             );
-            let to_prepend:String = if reverse {
+            let to_prepend: String = if reverse {
                 subs.chars().rev().collect::<String>()
-            }else {
+            } else {
                 subs.to_string()
             };
             let lst = [to_prepend, to_stack];
@@ -53,12 +54,15 @@ fn mover(lines: Vec<String>, reverse: bool){
             let _got = replace(&mut stacks[to_idx as usize], to_stack);
         }
     }
-    for s in stacks.iter().map(|x| x.chars().nth(0).unwrap_or_default()).collect::<Vec<char>>(){
+    for s in stacks
+        .iter()
+        .map(|x| x.chars().nth(0).unwrap_or_default())
+        .collect::<Vec<char>>()
+    {
         print!("{}", s)
     }
     println!()
 }
-
 
 fn part_one(lines: Vec<String>) {
     mover(lines, true)
