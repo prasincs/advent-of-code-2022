@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
 fn compute_position_tail(
     pos_h: (i32, i32),
@@ -19,17 +19,19 @@ fn compute_position_tail(
 pub fn run() {
     use crate::lines_from_file;
     let lines = lines_from_file("./inputs/day-9");
-    let cmds = lines.iter().map(|line| {
-        let w: Vec<&str> = line.split_whitespace().collect();
-        (w[0], w[1].parse::<u32>().unwrap())
-    })
-    .collect();
+    let cmds = lines
+        .iter()
+        .map(|line| {
+            let w: Vec<&str> = line.split_whitespace().collect();
+            (w[0], w[1].parse::<u32>().unwrap())
+        })
+        .collect();
     part_one(cmds);
     // sample_test();
 }
 
-fn sample_test(){
-let input: String = String::from(
+fn sample_test() {
+    let input: String = String::from(
         r#"R 4
 U 4
 L 3
@@ -47,8 +49,6 @@ R 2"#,
         })
         .collect();
 
-
-  
     // println!("{:?}",compute_position_tail((posH.0+1, posH.1), posT));
     // println!("{:?}",compute_position_tail((posH.0+2, posH.1), posT));
     // println!("{:?}",compute_position_tail((posH.0+3, posH.1), (posT.0+1, posT.1)));
@@ -70,7 +70,6 @@ fn part_one(cmds: Vec<(&str, u32)>) {
                     pos_t = compute_position_tail(pos_h, pos_t, &mut visited_t);
                     println!("R{:?},{:?}", pos_h, pos_t);
                 }
-                
             }
             "U" => {
                 for _i in 0..len {
@@ -78,7 +77,6 @@ fn part_one(cmds: Vec<(&str, u32)>) {
                     pos_t = compute_position_tail(pos_h, pos_t, &mut visited_t);
                     println!("U{:?},{:?}", pos_h, pos_t);
                 }
-               
             }
             "D" => {
                 for _i in 0..len {
