@@ -246,7 +246,9 @@ fn part_two(grid: &Vec<Vec<u32>>) {
                 Direction::RIGHT,
                 Direction::BOTTOM,
             ]
-            .iter().map(|direction| count_visible(*direction, x, y, &grid)).fold(1, |mult, i| mult*i);
+            .iter()
+            .map(|direction| count_visible(*direction, x, y, &grid))
+            .fold(1, |mult, i| mult * i);
             scenic_scores.push(score);
         }
     }

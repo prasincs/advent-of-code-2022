@@ -18,6 +18,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
     let file = File::open(filename).expect("no such file");
@@ -69,6 +70,10 @@ fn main() -> Result<(), Error> {
         }
         8 => {
             day8::run();
+            Ok(())
+        }
+        9 => {
+            day9::run();
             Ok(())
         }
         _ => bail!("not done yet"),
