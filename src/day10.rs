@@ -1,8 +1,8 @@
-use std::{mem::replace, collections::HashMap};
+use std::{collections::HashMap, mem::replace, str::Chars};
 
-fn test_sample(){
+fn test_sample() {
     let input: String = String::from(
-r#"addx 15
+        r#"addx 15
 addx -11
 addx 6
 addx -3
@@ -164,82 +164,178 @@ noop"#,
             }
         })
         .collect();
-   
-        run_processor(instructions);
+
+    run_processor(instructions, Some(true));
     // println!("{}", registerX)
 }
 
-fn run_processor(instructions: Vec<(&str, i32)>){
+fn run_processor(instructions: Vec<(&str, i32)>, draw: Option<bool>) {
     let mut curr_cycle = 0u32;
     let mut registerX: i32 = 1;
     let mut cur_idx: usize = 0;
-    let mut processor: Vec<(&str,i32, u32)> = vec![];
+    let mut processor: Vec<(&str, i32, u32)> = vec![];
     let mut signals: HashMap<u32, i32> = HashMap::new();
-    while cur_idx < instructions.len(){
-    // for (cmd, amt) in instructions {
-        match curr_cycle{
+    let mut screen: Vec<[&str; 40]> = vec![
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+        [
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+            ".", ".", ".", ".", ".", ".",
+        ],
+    ];
+    while cur_idx < instructions.len() {
+        match curr_cycle {
             20 | 60 | 100 | 140 | 180 | 220 => {
                 signals.insert(curr_cycle, registerX);
-                println!("[{}]X:{}", curr_cycle, registerX )
-            },
-            _ => {}
+                // println!("[{}]X:{}", curr_cycle, registerX )
+            }
+            240 => break,
+            _ => {
+                if draw == Some(true) && curr_cycle > 0 {
+                    let curr_end_cycle = curr_cycle - 1;
+                    let row: usize = (curr_end_cycle / 40) as usize;
+                    let col: usize = (curr_end_cycle % 40) as usize;
+                    println!(
+                        "[{}]X:{}, row:{}, col:{}",
+                        curr_end_cycle, registerX, row, col
+                    );
+
+                    // let row_x: usize = (registerX / 40) as usize;
+                    let col_x: usize = (registerX % 40) as usize;
+                    println!(
+                        "[{}] col_x as i32 - col as i32).abs() == {}",
+                        curr_end_cycle,
+                        (col_x as i32 - col as i32).abs()
+                    );
+                    if (col_x as i32 - col as i32).abs() < 2 {
+                        println!("drawing #");
+                        let _got = replace(&mut screen[row][col], "#");
+                    } else {
+                        println!("drawing .");
+                        let _got = replace(&mut screen[row][col], ".");
+                        // if col - 1 >= 0 {
+                        //     let _got = replace(&mut screen[row][col - 1], "#");
+                        // }
+
+                        // if col >= 0 && col <= 39 {
+                        //     if
+                        //     let _got = replace(&mut screen[row][col], "#");
+                        // }
+                        // if col + 1 <= 39 {
+                        //     let _got = replace(&mut screen[row][col + 1], "#");
+                        // }
+                    }
+                    if curr_cycle < 10 {
+                        for s in screen.clone() {
+                            println!("{}", s.join(""));
+                        }
+                    }
+                }
+            }
         }
         if processor.len() > 0 {
             let &mut curr_processing = &mut processor[0];
             let (cmd, amt, left_cycles) = curr_processing;
             if left_cycles == 0 {
                 processor.pop();
-                cur_idx+=1;
+                cur_idx += 1;
             }
             match cmd {
-                "noop" => {continue;},
+                "noop" => {
+                    continue;
+                }
                 "addx" => {
-                    // println!("cmd: '{}', cycles: {}", cmd, left_cycles);
                     if left_cycles > 0 {
-                        // let _got = replace(&mut stacks[from_idx as usize], from_stack.to_string());
-                        let _got = replace(&mut processor[0], (cmd, amt, left_cycles-1));
-                    }else {
+                        let _got = replace(&mut processor[0], (cmd, amt, left_cycles - 1));
+                    } else {
                         registerX += amt;
                     }
-                },
+                }
                 &_ => todo!(),
             }
         }
-        curr_cycle+=1;
+        curr_cycle += 1;
         if processor.len() == 0 {
             let (next_cmd, next_amt) = instructions[cur_idx];
-            let required_cycles = match next_cmd{
+            let required_cycles = match next_cmd {
                 "noop" => 0,
                 "addx" => 1,
                 _ => panic!("unknown cmd {}", next_cmd),
             };
             processor.push((next_cmd, next_amt, required_cycles));
-            // println!("here [{}] {}, register-X:{}", curr_cycle, next_amt, registerX);
         }
     }
     let mut sum = 0i32;
-    for (key, value) in signals.iter(){
-        sum += *key as i32*value;
+    for (key, value) in signals.iter() {
+        sum += *key as i32 * value;
     }
     println!("{}", sum);
+    if draw == Some(true) {
+        for s in screen {
+            println!("{}", s.join(""));
+        }
+    }
 }
 
-fn part_one(){
+fn part_one() {
     use crate::lines_from_file;
     let lines = lines_from_file("./inputs/day-10");
-    let instructions = lines.iter().map(|line| {
-        let w: Vec<&str> = line.split_whitespace().collect();
-        if w.len() == 1 {
-            (w[0], 0)
-        } else {
-            (w[0], w[1].parse::<i32>().unwrap())
-        }
-    })
-    .collect();
-    run_processor(instructions);
+    let instructions: Vec<(&str, i32)> = lines
+        .iter()
+        .map(|line| {
+            let w: Vec<&str> = line.split_whitespace().collect();
+            if w.len() == 1 {
+                (w[0], 0)
+            } else {
+                (w[0], w[1].parse::<i32>().unwrap())
+            }
+        })
+        .collect();
+    run_processor(instructions, None);
+}
+
+fn part_two() {
+    use crate::lines_from_file;
+    let lines = lines_from_file("./inputs/day-10");
+    let instructions: Vec<(&str, i32)> = lines
+        .iter()
+        .map(|line| {
+            let w: Vec<&str> = line.split_whitespace().collect();
+            if w.len() == 1 {
+                (w[0], 0)
+            } else {
+                (w[0], w[1].parse::<i32>().unwrap())
+            }
+        })
+        .collect();
+    run_processor(instructions, Some(true));
 }
 
 pub fn run() {
     // test_sample();
-    part_one();
+    part_two();
 }
