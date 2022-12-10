@@ -219,40 +219,22 @@ fn run_processor(instructions: Vec<(&str, i32)>, draw: Option<bool>) {
                     let curr_end_cycle = curr_cycle - 1;
                     let row: usize = (curr_end_cycle / 40) as usize;
                     let col: usize = (curr_end_cycle % 40) as usize;
-                    println!(
-                        "[{}]X:{}, row:{}, col:{}",
-                        curr_end_cycle, registerX, row, col
-                    );
+                    // println!(
+                    //     "[{}]X:{}, row:{}, col:{}",
+                    //     curr_end_cycle, registerX, row, col
+                    // );
 
                     // let row_x: usize = (registerX / 40) as usize;
                     let col_x: usize = (registerX % 40) as usize;
-                    println!(
-                        "[{}] col_x as i32 - col as i32).abs() == {}",
-                        curr_end_cycle,
-                        (col_x as i32 - col as i32).abs()
-                    );
+                    // println!(
+                    //     "[{}] col_x as i32 - col as i32).abs() == {}",
+                    //     curr_end_cycle,
+                    //     (col_x as i32 - col as i32).abs()
+                    // );
                     if (col_x as i32 - col as i32).abs() < 2 {
-                        println!("drawing #");
                         let _got = replace(&mut screen[row][col], "#");
                     } else {
-                        println!("drawing .");
                         let _got = replace(&mut screen[row][col], ".");
-                        // if col - 1 >= 0 {
-                        //     let _got = replace(&mut screen[row][col - 1], "#");
-                        // }
-
-                        // if col >= 0 && col <= 39 {
-                        //     if
-                        //     let _got = replace(&mut screen[row][col], "#");
-                        // }
-                        // if col + 1 <= 39 {
-                        //     let _got = replace(&mut screen[row][col + 1], "#");
-                        // }
-                    }
-                    if curr_cycle < 10 {
-                        for s in screen.clone() {
-                            println!("{}", s.join(""));
-                        }
                     }
                 }
             }
@@ -293,11 +275,13 @@ fn run_processor(instructions: Vec<(&str, i32)>, draw: Option<bool>) {
     for (key, value) in signals.iter() {
         sum += *key as i32 * value;
     }
-    println!("{}", sum);
-    if draw == Some(true) {
+    match draw {
+        Some(true) => {
         for s in screen {
             println!("{}", s.join(""));
         }
+        }
+        None | Some(false) => println!("sum: {}", sum)
     }
 }
 
@@ -336,6 +320,6 @@ fn part_two() {
 }
 
 pub fn run() {
-    // test_sample();
+    part_one();
     part_two();
 }
