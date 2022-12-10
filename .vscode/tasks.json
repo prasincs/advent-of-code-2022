@@ -12,11 +12,14 @@
 		{
 			"type": "cargo",
 			"command": "run",
-			"args": ["7"],
+			"env": {
+				"RUST_BACKTRACE": "1",
+			},
+			"args": ["8"],
 			"problemMatcher": [
 				"$rustc"
 			],
-			"label": "rust: cargo run day 7"
+			"label": "rust: cargo run day 8"
 		}
 	]
 }
