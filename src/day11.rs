@@ -28,13 +28,14 @@ fn part_one(){
 }
 
 fn part_two(){
-    do_monkey_business("day-11-sample", 2, 20);
+    // do_monkey_business("day-11-sample", 1, 10000);
+    do_monkey_business("day-11", 1, 10000);
 }
 
 pub fn run() {
     // do_monkey_business("day-11-sample");
-    // part_two();
-    part_two()
+    part_two();
+    // part_two()
 }
 
 fn do_monkey_business(filename :&str, relief_factor: u64, rounds: u32) {
@@ -117,28 +118,20 @@ fn do_monkey_business(filename :&str, relief_factor: u64, rounds: u32) {
             monkey = Default::default();
         }
     }
+    let divisibility_factor = monkeys.values().map(|x|x.TestDivisibleby).fold(1, |x,y| x*y); 
+    print_state(&mut monkeys);
     let mut inspection_counter : HashMap<u32, u64> = HashMap::new();
     for round in 1..=rounds {
-        run_round(round, &mut monkeys, relief_factor, &mut inspection_counter);
+        run_round(round, &mut monkeys, relief_factor, divisibility_factor, &mut inspection_counter);
     }
     for (id, count) in inspection_counter.iter().sorted(){
         println!("[id={}]count={}", id,count);
     }
     let monkey_business = inspection_counter.into_values().sorted().rev().take(2).fold(1, |x,y| x*y);
-    println!("moneky business level = {}", monkey_business)
-    // println!("{:?}", moves_map);
-    // for (id, moves) in moves_map {
-    //     if let Some(monkey) = monkeys.get_mut(&id) {
-    //         let to_remove: Vec<u32> = moves.iter().map(|x| x.0).collect();
-    //         let mut current_worries = monkey.ItemWorries.clone();
-    //         println!("[{}]{:?}, to_remove: {:?}", id, current_worries, to_remove);
-    //         current_worries.retain(|x| !to_remove.contains(x));
-    //         println!("[{}]{:?}", id, current_worries);
-    //     };
-    // }
+    println!("monkey business level = {}", monkey_business)
 }
 
-fn run_round(round: u32, monkeys: &mut HashMap<u32, Monkey>, relief_factor: u64, inspection_counter: &mut HashMap<u32,u64>) {
+fn run_round(round: u32, monkeys: &mut HashMap<u32, Monkey>, relief_factor: u64, divisibility_factor: u64, inspection_counter: &mut HashMap<u32,u64>) {
     let mut new_worry_items: Vec<(u32,u64)> = vec![];
     // we are going to mutate the original monkeys, so use a clone
     for (id, monkey) in monkeys.clone().iter().sorted() {
@@ -154,23 +147,31 @@ fn run_round(round: u32, monkeys: &mut HashMap<u32, Monkey>, relief_factor: u64,
                     panic!("Invalid operation {:?}", monkey.Operation);
                 }
             };
-            let new_worry_value: u64 = current_worry_value / relief_factor; 
+            let mut new_worry_value: u64 = current_worry_value / relief_factor; 
+            
             let remainder = new_worry_value % monkey.TestDivisibleby;
-            // println!(
-            //     "monkey={},worry={}, divisible by={}, new_worry={}, remainder={}",
-            //     monkey.ID,
-            //     current_worry_value, monkey.TestDivisibleby, new_worry_value, remainder
-            // );
+            if relief_factor == 1 || relief_factor == 0 {
+                // all numbers are primes, so mod this should always scale
+                new_worry_value =  new_worry_value % divisibility_factor;
+            }
+            println!(
+                "monkey={},worry={}, divisible by={}, new_worry={}, remainder={}",
+                monkey.ID,
+                current_worry_value, monkey.TestDivisibleby, new_worry_value, remainder
+            );
             inspection_counter.entry(*id).and_modify(|counter| *counter += 1).or_insert(1);
         
             if remainder == 0 {
                 // println!("move {} to monkey {}", worry_item, monkey.TrueCase);
                 let moved_monkey = monkeys.get_mut(&monkey.TrueCase).unwrap();
+                
+                //new_worry_value = monkey.TestDivisibleby;
                 moved_monkey.ItemWorries.push(new_worry_value);
                 new_worry_items.push((monkey.TrueCase, new_worry_value));
             } else {
                 // println!("move {} to monkey {}", worry_item, monkey.FalseCase);
                 let moved_monkey = monkeys.get_mut(&monkey.FalseCase).unwrap();
+                //new_worry_value = monkey.TestDivisibleby + remainder;
                 moved_monkey.ItemWorries.push(new_worry_value);
                 new_worry_items.push((monkey.FalseCase, new_worry_value))
             }
