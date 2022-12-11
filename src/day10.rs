@@ -277,11 +277,11 @@ fn run_processor(instructions: Vec<(&str, i32)>, draw: Option<bool>) {
     }
     match draw {
         Some(true) => {
-        for s in screen {
-            println!("{}", s.join(""));
+            for s in screen {
+                println!("{}", s.join(""));
+            }
         }
-        }
-        None | Some(false) => println!("sum: {}", sum)
+        None | Some(false) => println!("sum: {}", sum),
     }
 }
 

@@ -12,6 +12,7 @@ use std::{
 
 mod day1;
 mod day10;
+mod day11;
 mod day2;
 mod day3;
 mod day4;
@@ -79,6 +80,10 @@ fn main() -> Result<(), Error> {
         }
         10 => {
             day10::run();
+            Ok(())
+        }
+        11 => {
+            day11::run();
             Ok(())
         }
         _ => bail!("not done yet"),

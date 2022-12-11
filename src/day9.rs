@@ -1,4 +1,4 @@
-use std::{collections::HashMap, vec, mem::replace};
+use std::{collections::HashMap, mem::replace, vec};
 
 fn compute_position_tail(
     pos_h: (i32, i32),
@@ -17,12 +17,12 @@ fn compute_position_tail(
 }
 
 fn compute_positions(
-    pos_ropes: Vec<(i32,i32)>,
+    pos_ropes: Vec<(i32, i32)>,
     visited_tail: &mut HashMap<(i32, i32), bool>,
-) -> Vec<(i32,i32)>{
-    let mut new_vec: Vec<(i32,i32)> = vec![];
+) -> Vec<(i32, i32)> {
+    let mut new_vec: Vec<(i32, i32)> = vec![];
     new_vec.push(pos_ropes[0]);
-    for i in 1..pos_ropes.len(){
+    for i in 1..pos_ropes.len() {
         let prev_elem_idx = i - 1;
         let pos_before = new_vec.get(prev_elem_idx).unwrap();
         let pos = pos_ropes.get(i).unwrap();
@@ -33,10 +33,10 @@ fn compute_positions(
             x += delta.0.signum();
             y += delta.1.signum();
         }
-        new_vec.push((x,y));
+        new_vec.push((x, y));
     }
     // println!("last: {:?}", new_vec.last());
-    visited_tail.insert((new_vec.last().unwrap().0,new_vec.last().unwrap().1), true);
+    visited_tail.insert((new_vec.last().unwrap().0, new_vec.last().unwrap().1), true);
     new_vec
 }
 
@@ -107,18 +107,18 @@ R 2"#,
     part_two(cmds)
 }
 
-fn part_two(cmds: Vec<(&str, u32)>){
-    let mut pos_ropes : Vec<(i32,i32)> = vec![
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
+fn part_two(cmds: Vec<(&str, u32)>) {
+    let mut pos_ropes: Vec<(i32, i32)> = vec![
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
     ];
     // assert_eq!(10, ropes.len())
     // let _got = replace(&mut ropes[0], (2,0));
@@ -128,14 +128,14 @@ fn part_two(cmds: Vec<(&str, u32)>){
     for (cmd, len) in cmds {
         println!("cmd={},len={}", cmd, len);
         println!("{:?}", pos_ropes);
-        for row in -20..20{
+        for row in -20..20 {
             for col in -20..20 {
-                let mut to_print:String = ".".to_string();
-                for (i, (x,y)) in pos_ropes.iter().enumerate(){
-                    if (row, col) == (*x, *y){
+                let mut to_print: String = ".".to_string();
+                for (i, (x, y)) in pos_ropes.iter().enumerate() {
+                    if (row, col) == (*x, *y) {
                         if i == 0 {
                             to_print = "H".to_string();
-                        }else {
+                        } else {
                             to_print = format!("{}", i);
                         }
                     }
@@ -153,28 +153,28 @@ fn part_two(cmds: Vec<(&str, u32)>){
             "R" => {
                 for _i in 0..len {
                     let pos_h = pos_ropes[0];
-                    let _got = replace(&mut pos_ropes[0], (pos_h.0,pos_h.1+1)); 
+                    let _got = replace(&mut pos_ropes[0], (pos_h.0, pos_h.1 + 1));
                     pos_ropes = compute_positions(pos_ropes, &mut visited_t);
                 }
             }
             "U" => {
                 for _i in 0..len {
                     let pos_h = pos_ropes[0];
-                    let _got = replace(&mut pos_ropes[0], (pos_h.0+1,pos_h.1));            
+                    let _got = replace(&mut pos_ropes[0], (pos_h.0 + 1, pos_h.1));
                     pos_ropes = compute_positions(pos_ropes, &mut visited_t);
                 }
             }
             "D" => {
                 for _i in 0..len {
                     let pos_h = pos_ropes[0];
-                    let _got = replace(&mut pos_ropes[0], (pos_h.0-1,pos_h.1));            
+                    let _got = replace(&mut pos_ropes[0], (pos_h.0 - 1, pos_h.1));
                     pos_ropes = compute_positions(pos_ropes, &mut visited_t);
                 }
             }
             "L" => {
                 for _i in 0..len {
                     let pos_h = pos_ropes[0];
-                    let _got = replace(&mut pos_ropes[0], (pos_h.0,pos_h.1-1));            
+                    let _got = replace(&mut pos_ropes[0], (pos_h.0, pos_h.1 - 1));
                     pos_ropes = compute_positions(pos_ropes, &mut visited_t);
                 }
             }
