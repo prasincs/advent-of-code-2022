@@ -118,6 +118,7 @@ fn do_monkey_business(filename :&str, relief_factor: u64, rounds: u32) {
             monkey = Default::default();
         }
     }
+    // since all the numbers are prime, just calculate the large number we need to scale by so that it doesn't grow forever
     let divisibility_factor = monkeys.values().map(|x|x.TestDivisibleby).fold(1, |x,y| x*y); 
     print_state(&mut monkeys);
     let mut inspection_counter : HashMap<u32, u64> = HashMap::new();
