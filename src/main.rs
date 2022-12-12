@@ -1,5 +1,6 @@
 #![feature(array_windows)]
-
+#[macro_use]
+extern crate lazy_static;
 use anyhow::{bail, Error};
 use chrono::{NaiveDate, Utc};
 use chrono_tz::America::New_York;
@@ -13,6 +14,7 @@ use std::{
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -84,6 +86,10 @@ fn main() -> Result<(), Error> {
         }
         11 => {
             day11::run();
+            Ok(())
+        }
+        12 => {
+            day12::run();
             Ok(())
         }
         _ => bail!("not done yet"),

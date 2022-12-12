@@ -35,8 +35,6 @@ struct FileSystem {
     directories: HashMap<String, Directory>,
 }
 
-// cribbed partly from https://github.com/mvduijn/aoc2022/blob/main/day7/src/main.rs
-
 enum ParsedLine {
     Ls,
     Cd(String),
