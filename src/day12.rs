@@ -20,75 +20,6 @@ fn get_neighbors(grid: Vec<Vec<char>>, x: usize, y: usize) -> Vec<(usize, usize,
     neighbors
 }
 
-fn backtrack(
-    grid: Vec<Vec<char>>,
-    solution: Vec<(usize, usize, char)>,
-    goal: (usize, usize),
-    x: usize,
-    y: usize,
-) -> Option<Vec<(usize, usize, char)>> {
-    if solution.len() % 10 == 0 {
-        println!(
-            "backtracking x={},y={},goal={:?},solution={:?}",
-            x,
-            y,
-            goal,
-            solution.len()
-        );
-    }
-
-    let cur_char = grid[x][y];
-    if solution.len() > 5000 {
-        panic!("overflow, solution too long = {}", solution.len());
-    }
-    let mut solution2 = Vec::from(solution);
-    solution2.push((x, y, cur_char));
-    if is_goal(x, y, goal) {
-        return Some(solution2.to_vec());
-    } else {
-        let neighbors = get_neighbors(grid.clone(), x, y);
-        // println!(
-        //     "neighbors of (x={},y={}, ch={}) = {:?} ",
-        //     x, y, cur_char, neighbors
-        // );
-        for (n_x, n_y, _) in neighbors {
-            if valid_move(grid.clone(), solution2.clone(), cur_char, n_x, n_y) {
-                let sol_opt = backtrack(grid.clone(), solution2.clone(), goal, n_x, n_y);
-                match sol_opt {
-                    Some(solution) => return Some(solution.to_vec()),
-                    None => continue,
-                }
-            }
-        }
-    }
-    None
-}
-
-fn is_goal(x: usize, y: usize, goal: (usize, usize)) -> bool {
-    x == goal.0 && y == goal.1
-}
-
-fn valid_move(
-    grid: Vec<Vec<char>>,
-    solution: Vec<(usize, usize, char)>,
-    cur_char: char,
-    row: usize,
-    col: usize,
-) -> bool {
-    let new_char = grid[row][col];
-    for (x, y, _) in solution {
-        if x == row && y == col {
-            // we've already visited this in this solution
-            return false;
-        }
-    }
-    if cur_char == 'S' || new_char == 'E' {
-        true
-    } else {
-        (cur_char as u8).abs_diff(new_char as u8) <= 1
-    }
-}
-
 fn run_sample() {
     let input: String = String::from(
         r#"Sabqponm
@@ -187,26 +118,6 @@ fn process_input(input: String) {
     let length = find_length(start_coord, end_coord, grid);
     println!("{}", length);
 }
-
-// doesn't work for full solution
-// lets try some good old backtracking 101
-// let solution: Vec<(usize, usize, char)> = vec![];
-// let mut map: HashMap<(usize, usize), Option<Vec<(usize, usize, char)>>> = HashMap::new();
-// match backtrack(
-//     grid.clone(),
-//     solution,
-//     end_coord,
-//     start_coord.0,
-//     start_coord.1,
-// ) {
-//     Some(solution) => {
-//         println!("{:?}", solution);
-//         println!("{}", solution.len() - 2 /*removing S and E */);
-//     }
-//     None => {
-//         println!("No Solution")
-//     }
-// }
 
 fn find_length(
     start_coord: (usize, usize),
