@@ -1,19 +1,21 @@
-use std::{collections::HashMap, fs, vec};
+use std::{
+    collections::{linked_list::CursorMut, HashMap, HashSet, VecDeque},
+    fs, vec,
+};
 
 fn get_neighbors(grid: Vec<Vec<char>>, x: usize, y: usize) -> Vec<(usize, usize, char)> {
-    // println!("neighbors for {:?}", (x, y, grid[x][y]));
     let mut neighbors: Vec<(usize, usize, char)> = vec![];
-    for i in x as i32 - 1..=x as i32 + 1 {
-        for j in y as i32 - 1..=y as i32 + 1 {
-            if i < 0 || j < 0 || i >= grid.len() as i32 || j >= grid[0].len() as i32 {
-                continue;
-            }
-            if i as usize == x && j as usize == y {
-                continue;
-            }
-            let ch = grid[i as usize][j as usize];
-            neighbors.push((i as usize, j as usize, ch));
+    for (i, j) in vec![
+        (x as i32 - 1, y as i32),
+        (x as i32 + 1, y as i32),
+        (x as i32, y as i32 - 1),
+        (x as i32, y as i32 + 1),
+    ] {
+        if i < 0 || j < 0 || i >= grid.len() as i32 || j >= grid[0].len() as i32 {
+            continue;
         }
+        let ch = grid[i as usize][j as usize];
+        neighbors.push((i as usize, j as usize, ch));
     }
     neighbors
 }
@@ -103,8 +105,58 @@ fn part_one() {
     process_input(input);
 }
 
+fn part_two() {
+    //     let input: String = String::from(
+    //         r#"Sabqponm
+    // abcryxxl
+    // accszExk
+    // acctuvwj
+    // abdefghi"#,
+    //     );
+    let input = fs::read_to_string("./inputs/day-12").expect("Unable to read file");
+    let mut start_coords: Vec<(usize, usize)> = vec![];
+    let mut end_coord: (usize, usize) = (0, 0);
+    let grid: Vec<Vec<char>> = input
+        .split("\n")
+        .enumerate()
+        .map(|(x, line)| {
+            line.chars()
+                .enumerate()
+                .map(|(y, f)| match f {
+                    'S' | 'a' => {
+                        start_coords.push((x, y));
+                        'a'
+                    }
+                    'E' => {
+                        end_coord = (x, y);
+                        'z'
+                    }
+                    _ => f as char,
+                })
+                .collect()
+        })
+        .collect();
+
+    let mut min = u32::MAX;
+    // loop through all
+    for start_coord in start_coords {
+        let length = find_length(start_coord, end_coord, grid.clone());
+        println!(
+            "start={:?},end={:?},length={}",
+            start_coord, end_coord, length
+        );
+        if length < min {
+            min = length
+        }
+    }
+    println!("min={}", min);
+    // process_input(input);
+}
+
 pub fn run() {
-    part_one();
+    part_two();
+    // part_one();
+    // run_sample();
 }
 
 fn process_input(input: String) {
@@ -116,46 +168,81 @@ fn process_input(input: String) {
         .map(|(x, line)| {
             line.chars()
                 .enumerate()
-                .map(|(y, f)| {
-                    match f {
-                        'S' => {
-                            start_coord = (x, y);
-                        }
-                        'E' => {
-                            end_coord = (x, y);
-                        }
-                        _ => {}
-                    };
-                    f as char
+                .map(|(y, f)| match f {
+                    'S' => {
+                        start_coord = (x, y);
+                        'a'
+                    }
+                    'E' => {
+                        end_coord = (x, y);
+                        'z'
+                    }
+                    _ => f as char,
                 })
                 .collect()
         })
         .collect();
-    for row in &grid {
-        println!("{:?}", row);
-    }
-    println!("{:?}", end_coord);
-    let neighbors = get_neighbors(grid.clone(), start_coord.0, start_coord.1);
-    println!("{:?}", neighbors);
-    let neighbors = get_neighbors(grid.clone(), 2, 4);
-    println!("{:?}", neighbors);
-    // lets try some good old backtracking 101
-    let solution: Vec<(usize, usize, char)> = vec![];
 
-    let mut map: HashMap<(usize, usize), Option<Vec<(usize, usize, char)>>> = HashMap::new();
-    match backtrack(
-        grid.clone(),
-        solution,
-        end_coord,
-        start_coord.0,
-        start_coord.1,
-    ) {
-        Some(solution) => {
-            println!("{:?}", solution);
-            println!("{}", solution.len() - 2 /*removing S and E */);
+    // dijkstra
+    let length = find_length(start_coord, end_coord, grid);
+    println!("{}", length);
+}
+
+// doesn't work for full solution
+// lets try some good old backtracking 101
+// let solution: Vec<(usize, usize, char)> = vec![];
+// let mut map: HashMap<(usize, usize), Option<Vec<(usize, usize, char)>>> = HashMap::new();
+// match backtrack(
+//     grid.clone(),
+//     solution,
+//     end_coord,
+//     start_coord.0,
+//     start_coord.1,
+// ) {
+//     Some(solution) => {
+//         println!("{:?}", solution);
+//         println!("{}", solution.len() - 2 /*removing S and E */);
+//     }
+//     None => {
+//         println!("No Solution")
+//     }
+// }
+
+fn find_length(
+    start_coord: (usize, usize),
+    end_coord: (usize, usize),
+    grid: Vec<Vec<char>>,
+) -> u32 {
+    let mut queue = VecDeque::from(vec![(
+        start_coord,
+        grid[start_coord.0][start_coord.1],
+        0, /*length */
+    )]);
+    let mut visited: HashSet<(usize, usize)> = HashSet::from([start_coord]);
+    // println!("end={:?}", end_coord);
+    // println!("queue={:?}, visited={:?}", queue, visited.len());
+    // println!("{:?}", visited);
+    while !queue.is_empty() {
+        let (curr_pos, curr_char, length) = queue.pop_front().unwrap();
+        // println!("queue={:?}, visited={:?}", queue.len(), visited.len());
+        // println!("curr_pos={:?}", curr_pos);
+
+        if curr_pos == end_coord {
+            return length;
         }
-        None => {
-            println!("No Solution")
+        // println!(
+        //     "neighbors of ({},{},{})={:?}",
+        //     curr_pos.0,
+        //     curr_pos.1,
+        //     curr_char,
+        //     get_neighbors(grid.clone(), curr_pos.0, curr_pos.1)
+        // );
+        for (n_x, n_y, new_char) in get_neighbors(grid.clone(), curr_pos.0, curr_pos.1) {
+            if ((new_char as i32 - curr_char as i32) <= 1) && !visited.contains(&(n_x, n_y)) {
+                queue.push_back(((n_x, n_y), new_char, length + 1));
+                visited.insert((n_x, n_y));
+            }
         }
     }
+    u32::MAX
 }

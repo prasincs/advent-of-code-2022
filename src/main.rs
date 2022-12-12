@@ -1,5 +1,5 @@
 #![feature(array_windows)]
-#[macro_use]
+#![feature(linked_list_cursors)]
 extern crate lazy_static;
 use anyhow::{bail, Error};
 use chrono::{NaiveDate, Utc};
