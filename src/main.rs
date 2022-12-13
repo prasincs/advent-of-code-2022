@@ -1,6 +1,5 @@
 #![feature(array_windows)]
 #![feature(linked_list_cursors)]
-extern crate lazy_static;
 use anyhow::{bail, Error};
 use chrono::{NaiveDate, Utc};
 use chrono_tz::America::New_York;

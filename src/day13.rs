@@ -1,15 +1,32 @@
-use std::any::type_name;
-use std::cmp::Ordering;
+use itertools::Itertools;
+use serde::Deserialize;
+use std::{cmp::Ordering, fs};
 
-fn type_of<T>(_: T) -> &'static str {
-    type_name::<T>()
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Deserialize)]
+#[serde(untagged)]
 enum Packet {
     List(Vec<Packet>),
     Int(i32),
 }
+
+// impl Serialize for Packet {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: serde::Serializer,
+//     {
+//         todo!()
+//     }
+// }
+
+// impl Deserialize for Packet {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de>,
+//     {
+//         todo!()
+//     }
+// }
+
 impl PartialOrd for Packet {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -108,6 +125,11 @@ mod tests {
 }
 
 pub fn run() {
+    let input = fs::read_to_string("./inputs/day-13").expect("Unable to read file");
+    part_one_run(input.as_str())
+}
+
+fn sample_test() {
     let input = r#"[1,1,3,1,1]
 [1,1,5,1,1]
 
@@ -131,4 +153,35 @@ pub fn run() {
 
 [1,[2,[3,[4,[5,6,7]]]],8,9]
 [1,[2,[3,[4,[5,6,0]]]],8,9]"#;
+
+    part_one_run(input);
+}
+
+fn part_one_run(input: &str) {
+    let pairs = parse_packet_pairs(input);
+    let mut sum = 0;
+    for (idx, (a, b)) in pairs.iter().enumerate() {
+        if let Ordering::Less = a.cmp(&b) {
+            sum += idx + 1;
+        }
+    }
+    println!("sum={}", sum);
+}
+
+fn parse_packet_pairs(input: &str) -> Vec<(Packet, Packet)> {
+    let pairs = input
+        .split("\n\n")
+        .map(|lines| {
+            lines
+                .split("\n")
+                .map(|line| parse_packet(line))
+                .collect_tuple::<(_, _)>()
+        })
+        .collect::<Option<Vec<(Packet, Packet)>>>()
+        .ok_or("invalid input string");
+    pairs.unwrap()
+}
+
+fn parse_packet(line: &str) -> Packet {
+    serde_json::from_str(line).unwrap()
 }
