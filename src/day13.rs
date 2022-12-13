@@ -9,23 +9,7 @@ enum Packet {
     Int(i32),
 }
 
-// impl Serialize for Packet {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: serde::Serializer,
-//     {
-//         todo!()
-//     }
-// }
-
-// impl Deserialize for Packet {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//     where
-//         D: serde::Deserializer<'de>,
-//     {
-//         todo!()
-//     }
-// }
+/* we just need deserialize here and untagged allows us to not make keys AFAICT */
 
 impl PartialOrd for Packet {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -126,7 +110,7 @@ mod tests {
 
 pub fn run() {
     let input = fs::read_to_string("./inputs/day-13").expect("Unable to read file");
-    part_one_run(input.as_str())
+    part_two_run(input.as_str())
 }
 
 fn sample_test() {
@@ -166,6 +150,24 @@ fn part_one_run(input: &str) {
         }
     }
     println!("sum={}", sum);
+}
+
+fn part_two_run(input: &str) {
+    let pairs = parse_packet_pairs(input);
+    let dividers = [
+        // [[2]]
+        Packet::List(vec![Packet::List(vec![Packet::Int(2)])]),
+        Packet::List(vec![Packet::List(vec![Packet::Int(6)])]),
+    ];
+    // https://stackoverflow.com/a/34745885
+    let key = pairs
+        .into_iter()
+        .flat_map(|(x, y)| [x, y])
+        .chain(dividers.clone()) // add in second iterator
+        .sorted()
+        .positions(|k| dividers.contains(&k))
+        .fold(1, |sum, idx| sum * (idx + 1));
+    println!("decoder key = {}", key);
 }
 
 fn parse_packet_pairs(input: &str) -> Vec<(Packet, Packet)> {
