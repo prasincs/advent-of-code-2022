@@ -15,6 +15,7 @@ mod day1;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod day2;
 mod day3;
 mod day4;
@@ -90,6 +91,10 @@ fn main() -> Result<(), Error> {
         }
         12 => {
             day12::run();
+            Ok(())
+        }
+        13 => {
+            day13::run();
             Ok(())
         }
         _ => bail!("not done yet"),

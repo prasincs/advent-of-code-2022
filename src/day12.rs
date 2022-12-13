@@ -114,7 +114,7 @@ fn process_input(input: String) {
         })
         .collect();
 
-    // dijkstra
+    // BFS
     let length = find_length(start_coord, end_coord, grid);
     println!("{}", length);
 }
