@@ -6,17 +6,17 @@ fn type_of<T>(_: T) -> &'static str {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-enum Token {
-    List(Vec<Token>),
+enum Packet {
+    List(Vec<Packet>),
     Int(i32),
 }
-impl PartialOrd for Token {
+impl PartialOrd for Packet {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Token {
+impl Ord for Packet {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             /* 4 cases
@@ -25,8 +25,8 @@ impl Ord for Token {
             (int, [int]),
             ([int], int)
             */
-            (Token::Int(a), Token::Int(b)) => a.cmp(b),
-            (Token::List(a), Token::List(b)) => {
+            (Packet::Int(a), Packet::Int(b)) => a.cmp(b),
+            (Packet::List(a), Packet::List(b)) => {
                 // find the smollest
                 for idx in 0..a.len().min(b.len()) {
                     let ord = a[idx].cmp(&b[idx]);
@@ -39,32 +39,73 @@ impl Ord for Token {
                 a.len().cmp(&b.len())
             }
             // encapsulate in list, so it now boils down to [int],[int]
-            (Token::Int(a), Token::List(_b)) => Token::List(vec![Token::Int(*a)]).cmp(other),
-            (Token::List(_a), Token::Int(b)) => self.cmp(&Token::List(vec![Token::Int(*b)])),
+            (Packet::Int(a), Packet::List(_b)) => Packet::List(vec![Packet::Int(*a)]).cmp(other),
+            (Packet::List(_a), Packet::Int(b)) => self.cmp(&Packet::List(vec![Packet::Int(*b)])),
         }
     }
 }
 
-// just tried this https://gist.github.com/rust-play/eb9c04d890f65765191b27a29056a305
-// fn is_pair_in_right_order<T: Ord>(vec1: Vec<&T>, vec2: Vec<&T>) -> bool {
-//     for (v1_idx, v1) in vec1.iter().enumerate() {
-//         // for (v2_idx, v2) in vec2.iter().enumerate() {
-//         let v2 = vec2[v1_idx];
-//         match type_of(v1) {
-//             "i32" | "u32" => {
-//                 if v1 > &v2 {
-//                     return false;
-//                 }
-//             }
-//             "&alloc::vec::Vec<u32>" => {
-//                 if typeof(v2) != "&alloc::vec::Vec<u32>" {
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cmp::Ordering;
 
-//                 }
-//             }
-//         }
-//     }
-//     true
-// }
+    #[test]
+    fn test_twolists_simple_pair1() {
+        assert_eq!(
+            Ordering::Less,
+            Packet::List(vec![
+                Packet::Int(1),
+                Packet::Int(1),
+                Packet::Int(3),
+                Packet::Int(1),
+                Packet::Int(1)
+            ])
+            .cmp(&Packet::List(vec![
+                Packet::Int(1),
+                Packet::Int(1),
+                Packet::Int(5),
+                Packet::Int(1),
+                Packet::Int(1)
+            ]))
+        )
+    }
+
+    #[test]
+    fn test_list_of_list_and_int_pair2() {
+        assert_eq!(
+            Ordering::Less,
+            Packet::List(vec![
+                Packet::List(vec![Packet::Int(1)],),
+                Packet::List(vec![Packet::Int(2), Packet::Int(3), Packet::Int(4)])
+            ])
+            .cmp(&Packet::List(vec![
+                Packet::List(vec![Packet::Int(1)],),
+                Packet::Int(4),
+            ]))
+        )
+    }
+    #[test]
+    fn test_pair3() {
+        assert_eq!(
+            Ordering::Greater,
+            Packet::List(vec![Packet::Int(9)]).cmp(&Packet::List(vec![
+                Packet::Int(8),
+                Packet::Int(7),
+                Packet::Int(6),
+            ]))
+        )
+    }
+
+    #[test]
+    fn test_pair7() {
+        assert_eq!(
+            Ordering::Greater,
+            Packet::List(vec![Packet::List(vec![Packet::List(vec![])])])
+                .cmp(&Packet::List(vec![Packet::List(vec![])]))
+        )
+    }
+}
 
 pub fn run() {
     let input = r#"[1,1,3,1,1]
@@ -90,22 +131,4 @@ pub fn run() {
 
 [1,[2,[3,[4,[5,6,7]]]],8,9]
 [1,[2,[3,[4,[5,6,0]]]],8,9]"#;
-
-    assert_eq!(
-        Ordering::Less,
-        Token::List(vec![
-            Token::Int(1),
-            Token::Int(1),
-            Token::Int(3),
-            Token::Int(1),
-            Token::Int(1)
-        ])
-        .cmp(&Token::List(vec![
-            Token::Int(1),
-            Token::Int(1),
-            Token::Int(5),
-            Token::Int(1),
-            Token::Int(1)
-        ]))
-    )
 }
