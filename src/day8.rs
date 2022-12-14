@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap};
 
 #[derive(Copy, Clone)]
 enum Direction {
@@ -139,7 +139,7 @@ fn count_visible(direction: Direction, x: usize, y: usize, grid: &Vec<Vec<u32>>)
             }
         }
         Direction::LEFT => {
-            let width = grid.get(0).unwrap().len() - 1;
+            let _width = grid.get(0).unwrap().len() - 1;
             if y == 0 {
                 return 0u32;
             } else {
@@ -177,7 +177,7 @@ fn test_samples() {
         .iter()
         .map(|line| line.chars().map(|k| k.to_digit(10).unwrap()).collect())
         .collect();
-    let mut visible_map: HashMap<(usize, usize), bool> = HashMap::new();
+    let visible_map: HashMap<(usize, usize), bool> = HashMap::new();
 
     assert!(!is_visible(Direction::TOP, &visible_map, 1, 3, &grid));
     assert!(!is_visible(Direction::LEFT, &visible_map, 3, 3, &grid));
@@ -236,7 +236,7 @@ fn part_one(grid: &Vec<Vec<u32>>) {
 }
 
 fn part_two(grid: &Vec<Vec<u32>>) {
-    let mut visible_map: HashMap<(usize, usize), bool> = HashMap::new();
+    let _visible_map: HashMap<(usize, usize), bool> = HashMap::new();
     let mut scenic_scores: Vec<u32> = vec![];
     for x in 0..grid.len() {
         for y in 0..grid.get(0).unwrap().len() {

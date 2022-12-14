@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem::replace, str::Chars};
+use std::{collections::HashMap, mem::replace};
 
 fn test_sample() {
     let input: String = String::from(

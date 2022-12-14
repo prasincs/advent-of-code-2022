@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use regex::Regex;
+
 use std::collections::HashMap;
-use std::hash::Hash;
+
 use std::vec;
 
 #[derive(Default, Clone, Debug, PartialEq,PartialOrd, Eq)]
@@ -70,7 +70,7 @@ fn do_monkey_business(filename :&str, relief_factor: u64, rounds: u32) {
                 "Operation" => {
                     let op_items: Vec<&str> = items[1].split_ascii_whitespace().collect();
                     let mut op_symbol = op_items[3].to_string();
-                    let mut op_num_str = op_items[4].trim();
+                    let op_num_str = op_items[4].trim();
                     let mut op_num = 0u64;
                     if op_num_str == "old" {
                         op_symbol = "pow".to_string();
