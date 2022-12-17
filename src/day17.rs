@@ -68,8 +68,8 @@ mod test_super {
 }
 
 pub fn run() {
-    // let input = r#">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"#;
-    let input = fs::read_to_string("./inputs/day-17").expect("Unable to read file");
+    let input = r#">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"#;
+    // let input = fs::read_to_string("./inputs/day-17").expect("Unable to read file");
     println!("input len={}", input.len());
     let symbols: [Symbol; 5] = [
         Symbol::from(vec![vec!['#', '#', '#', '#']]),
@@ -84,9 +84,9 @@ pub fn run() {
             ],
         ),
         Symbol::from(vec![
-            vec![' ', ' ', '#'],
-            vec![' ', ' ', '#'],
             vec!['#', '#', '#'],
+            vec![' ', ' ', '#'],
+            vec![' ', ' ', '#'],
         ]),
         Symbol::from(vec![vec!['#'], vec!['#'], vec!['#'], vec!['#']]),
         Symbol::from(vec![vec!['#', '#'], vec!['#', '#']]),
@@ -108,15 +108,15 @@ pub fn run() {
     // make tall enough chamber to fit full run
     let mut chamber_map = [[0u8; 7]; 10000];
 
-    let (mut i, mut t, mut total_height) = (0, 0, 0);
-    let mut cache = HashMap::new();
-    while i < 1000000000000 {
+    let (mut i, mut tick, mut total_height) = (0, 0, 0);
+    // let mut cache = HashMap::new();
+    while i < 2023 {
         let symbol = &symbols[i % symbols.len()];
         let (mut h, mut w) = (get_height(&chamber_map) + 3, 2);
         loop {
             // println!("h = {:?}", h);
             // println!("w = {:?}", w);
-            match input.as_bytes()[t % input.len()] {
+            match input.as_bytes()[tick % input.len()] {
                 b'>' => {
                     if symbol.fits_in_chamber(&chamber_map, h, w + 1) {
                         w += 1;
@@ -129,14 +129,13 @@ pub fn run() {
                         }
                     }
                 }
-                _ => {}
+                _ => panic!("invalid input"),
             };
-            t += 1;
+            tick += 1;
             if h == 0 || !symbol.fits_in_chamber(&chamber_map, h - 1, w) {
                 break;
             }
             h -= 1;
-            // h = h.wrapping_sub(1)
         }
         // println!("{:?}", symbol.rock_map.clone());
         for (dh, dw) in symbol.rock_map.clone() {
@@ -145,28 +144,25 @@ pub fn run() {
             chamber_map[h + dh][w + dw] = b'#';
         }
 
-        let key = (
-            i % symbols.len(),
-            t % input.len(),
-            chamber_heights(&chamber_map),
-        );
-        if let Some((idx, height)) = cache.get(&key) {
-            let repeats = (1000000000000 - idx) / (i - idx) - 1;
-            i += (i - idx) * repeats;
-            total_height += (get_height(&chamber_map) - height) * repeats;
-        } else {
-            // println!("key={:?}, i={:?}", key, i);
-            cache.insert(key, (i, get_height(&chamber_map)));
-        }
+        // for h in chamber_map.iter().rev() {
+        //     if h == &[0u8; 7] {
+        //         continue;
+        //     }
+        //     for ch in h {
+        //         if *ch == 0 {
+        //             print!(".")
+        //         } else {
+        //             print!("{}", *ch as char);
+        //         }
+        //     }
+        //     println!();
+        // }
+
+        println!("height = {}", get_height(&chamber_map));
+        println!("========================================");
+
+        // printed out value for 2020 which was correct at 3202
+        println!("i = {:?}", i);
         i += 1;
     }
-    // cribbed from https://github.com/AxlLind/AdventOfCode2022/blob/main/src/bin/17.rs
-    // println!("cache values={}", cache.values().len());
-    let p1 = *cache
-        .values()
-        .find(|&&(i, _)| i == 2021)
-        .map(|(_, h)| h)
-        .unwrap();
-    // 3230 was too large
-    println!("{:?}", (p1, total_height + get_height(&chamber_map)));
 }
