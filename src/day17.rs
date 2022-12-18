@@ -1,17 +1,10 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    fs,
-};
+use std::{collections::HashMap, fs};
 
 struct Symbol {
     rock_map: Vec<(usize, usize)>,
 }
 
 impl Symbol {
-    fn from_rock_map(rock_map: Vec<(usize, usize)>) -> Self {
-        Self { rock_map }
-    }
-
     fn from(value: Vec<Vec<char>>) -> Self {
         // convert to numbers so that it's easier to compute whether it fits
         let mut rock_map: Vec<(usize, usize)> = vec![];
@@ -29,7 +22,7 @@ impl Symbol {
         // only return true iff it fits all the elements
         self.rock_map
             .iter()
-            .all(|(dh, dw)| width + dw < 7 && chamber[height + dh][width + dw] != b'#')
+            .all(|(x, y)| width + y < 7 && chamber[height + x][width + y] != b'#')
     }
 }
 
@@ -90,33 +83,12 @@ pub fn run() {
 
 fn part_one_solve(input: &str) {
     println!("input len={}", input.len());
-    let symbols: [Symbol; 5] = [
-        Symbol::from(vec![vec!['#', '#', '#', '#']]),
-        Symbol::from(
-            /*
-            (0,1),(1,0),(1,1),(1,2),(2,1)
-            */
-            vec![
-                vec![' ', '#', ' '],
-                vec!['#', '#', '#'],
-                vec![' ', '#', ' '],
-            ],
-        ),
-        Symbol::from(vec![
-            vec!['#', '#', '#'],
-            vec![' ', ' ', '#'],
-            vec![' ', ' ', '#'],
-        ]),
-        Symbol::from(vec![vec!['#'], vec!['#'], vec!['#'], vec!['#']]),
-        Symbol::from(vec![vec!['#', '#'], vec!['#', '#']]),
-    ];
-    for symbol in &symbols {
-        println!("symbol.rock_map = {:?}", symbol.rock_map);
-    }
+    let symbols = get_symbols();
     // allocate length of the current
     // make tall enough chamber to fit full run
     let mut chamber_map = [[0u8; 7]; 10000];
-    let (mut i, mut tick, mut total_height) = (0, 0, 0);
+    let mut i = 0;
+    let (mut i, mut tick) = (0, 0);
     // let mut cache = HashMap::new();
     while i < 2022 {
         let symbol = &symbols[i % symbols.len()];
@@ -162,29 +134,7 @@ fn part_one_solve(input: &str) {
 
 fn part_two_solve(input: &str) {
     println!("input len={}", input.len());
-    let symbols: [Symbol; 5] = [
-        Symbol::from(vec![vec!['#', '#', '#', '#']]),
-        Symbol::from(
-            /*
-            (0,1),(1,0),(1,1),(1,2),(2,1)
-            */
-            vec![
-                vec![' ', '#', ' '],
-                vec!['#', '#', '#'],
-                vec![' ', '#', ' '],
-            ],
-        ),
-        Symbol::from(vec![
-            vec!['#', '#', '#'],
-            vec![' ', ' ', '#'],
-            vec![' ', ' ', '#'],
-        ]),
-        Symbol::from(vec![vec!['#'], vec!['#'], vec!['#'], vec!['#']]),
-        Symbol::from(vec![vec!['#', '#'], vec!['#', '#']]),
-    ];
-    for symbol in &symbols {
-        println!("symbol.rock_map = {:?}", symbol.rock_map);
-    }
+    let symbols = get_symbols();
     // allocate length of the current
     // make tall enough chamber to fit full run
     let mut chamber_map = [[0u8; 7]; 10000];
@@ -234,21 +184,46 @@ fn part_two_solve(input: &str) {
         println!("========================================");
 
         let key = (
-            i % symbols.len(),
-            tick % input.len(),
-            chamber_heights(&chamber_map),
+            i % symbols.len(),             // rocks that have fallen - mod because they repeat
+            tick % input.len(),            // time spent - function of the tick
+            chamber_heights(&chamber_map), // map of the heights
         );
+        // so if the top of the chamber looks the same and you're on the i % symbols th rock then eventually you should repeat
         // idea is to find a point where we get a repetition -- if we find it, we can take that index and jump ahead
         // dont need to iterate through rest
-        if let Some((idx, height)) = cache.get(&key) {
-            let repeats = (1000000000000 - idx) / (i - idx) - 1;
-            i += (i - idx) * repeats;
-            total_height += (get_height(&chamber_map) - height) * repeats;
+        if let Some((index, height)) = cache.get(&key) {
+            let num_repeats = (1000000000000 - index) / (i - index) - 1;
+            i += (i - index) * num_repeats;
+            total_height += (get_height(&chamber_map) - height) * num_repeats;
         } else {
             cache.insert(key, (i, get_height(&chamber_map)));
         }
         i += 1;
     }
+}
+
+fn get_symbols() -> [Symbol; 5] {
+    let symbols: [Symbol; 5] = [
+        Symbol::from(vec![vec!['#', '#', '#', '#']]),
+        Symbol::from(
+            /*
+            (0,1),(1,0),(1,1),(1,2),(2,1)
+            */
+            vec![
+                vec![' ', '#', ' '],
+                vec!['#', '#', '#'],
+                vec![' ', '#', ' '],
+            ],
+        ),
+        Symbol::from(vec![
+            vec!['#', '#', '#'],
+            vec![' ', ' ', '#'],
+            vec![' ', ' ', '#'],
+        ]),
+        Symbol::from(vec![vec!['#'], vec!['#'], vec!['#'], vec!['#']]),
+        Symbol::from(vec![vec!['#', '#'], vec!['#', '#']]),
+    ];
+    symbols
 }
 
 fn print_chamber_map(chamber_map: [[u8; 7]; 10000]) {

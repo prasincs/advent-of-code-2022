@@ -6,6 +6,7 @@ use regex::Regex;
 struct Pair {
     sensor: (i32, i32),
     beacon: (i32, i32),
+    sensor_range: u32,
 }
 use lazy_static::lazy_static;
 
@@ -61,7 +62,12 @@ fn part_one() {
     let items = parse_input(input.as_str());
     let mut x_coords = (0, 0);
     let mut y_coords = (0, 0);
-    for Pair { sensor, beacon } in &items {
+    for Pair {
+        sensor,
+        beacon,
+        sensor_range,
+    } in &items
+    {
         x_coords.0 = std::cmp::min(x_coords.0, std::cmp::min(sensor.0, beacon.0));
         x_coords.1 = std::cmp::max(x_coords.1, std::cmp::max(sensor.0, beacon.0));
         y_coords.0 = std::cmp::min(y_coords.0, std::cmp::min(sensor.1, beacon.1));
@@ -88,15 +94,16 @@ fn parse_input(input: &str) -> Vec<Pair> {
         .split("\n")
         .map(|line| {
             let cap = RE.captures(line).unwrap();
+            let sensor_x = cap[1].parse::<i32>().unwrap();
+            let sensor_y = cap[2].parse::<i32>().unwrap();
+
+            let beacon_x = cap[3].parse::<i32>().unwrap();
+            let beacon_y = cap[4].parse::<i32>().unwrap();
+
             Pair {
-                sensor: (
-                    cap[1].parse::<i32>().unwrap(),
-                    cap[2].parse::<i32>().unwrap(),
-                ),
-                beacon: (
-                    cap[3].parse::<i32>().unwrap(),
-                    cap[4].parse::<i32>().unwrap(),
-                ),
+                sensor: (sensor_x, sensor_y),
+                beacon: (beacon_x, beacon_y),
+                sensor_range: sensor_x.abs_diff(beacon_x) + sensor_y.abs_diff(beacon_y),
             }
         })
         .collect();
