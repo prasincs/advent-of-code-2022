@@ -18,11 +18,11 @@
 			"env": {
 				"RUST_BACKTRACE": "1",
 			},
-			"args": ["20"],
+			"args": ["21"],
 			"problemMatcher": [
 				"$rustc"
 			],
-			"label": "rust: cargo run day 20"
+			"label": "rust: cargo run day 21"
 		}
 	]
 }
